@@ -3,6 +3,7 @@ package com.example.service_commande.service;
 import com.example.service_commande.dto.CommandeRequest;
 import com.example.service_commande.dto.Produit;
 
+import com.example.service_commande.event.CommandeEtablieEvent;
 import com.example.service_commande.model.Commande;
 import com.example.service_commande.repository.CommandeRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,8 @@ public class CommandeService {
         private  CommandeRepository commandeRepository;
         @Autowired
         private  WebClient webClient;
-//        @Autowired
-//        private  KafkaTemplate<String, CommandeEtablieEvent> kafkaTemplate;
+        @Autowired
+        private  KafkaTemplate<String, CommandeEtablieEvent> kafkaTemplate;
         public void etablirCommande(CommandeRequest request) {
                 // Liste finale des produits commandés
                 List<Produit> produitsCommandes = request.getSkuCodes().stream().map(skuCode -> {
@@ -71,16 +72,15 @@ public class CommandeService {
 
                 commandeRepository.save(commande);
 
-//                // 4️⃣ Envoyer l'événement Kafka
-//                CommandeEtablieEvent event = new CommandeEtablieEvent(
-//                        commande.getNumCommande(),
-//                        request.getNom(),
-//                        request.getPrenom(),
-//                        request.getEmail()
-//                );
-//
-//                kafkaTemplate.send("commande_etablie", event);
+                // 4️⃣ Envoyer l'événement Kafka
+                CommandeEtablieEvent event = new CommandeEtablieEvent(
+                        commande.getNumCommande(),
+                        request.getNom(),
+                        request.getPrenom(),
+                        request.getEmail()
+                );
 
+                kafkaTemplate.send("commande_etablie", event);
 
         }
 

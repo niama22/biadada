@@ -4,45 +4,34 @@ import com.example.notification.event.CommandeEtablieEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class NotificationService {
 
-    private final JavaMailSender javaMailSender;
+    private final JavaMailSender mailSender;
 
-    @KafkaListener(topics = "commande_etablie", groupId = "service-notification")
+    @KafkaListener(topics = "commande_etablie", groupId = "notification-group")
     public void listen(CommandeEtablieEvent event) {
+        System.out.println("Received event: " + event);
 
-        log.info("Message reçu : {}", event);
-
-        MimeMessagePreparator email = msg -> {
-            MimeMessageHelper helper = new MimeMessageHelper(msg);
-            helper.setFrom("springshop@email.com");
-            helper.setTo(event.getEmail());
-            helper.setSubject("Commande " + event.getNumCommande() + " établie");
-            helper.setText(buildEmailBody(event));
-        };
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(event.getEmail()); // Email du client
+        message.setSubject("Nouvelle commande reçue !");
+        message.setText("Bonjour " + event.getPrenom() + " " + event.getNom() + ",\n\n" +
+                "Votre commande (" + event.getNumCommande() + ") a été enregistrée avec succès.\n\nMerci !");
 
         try {
-            javaMailSender.send(email);
-            log.info("Email envoyé à {}", event.getEmail());
+            mailSender.send(message);
+            System.out.println("Email envoyé !");
         } catch (Exception e) {
             log.error("Erreur lors de l'envoi de l'email", e);
         }
     }
 
-    private String buildEmailBody(CommandeEtablieEvent event) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Bonjour ").append(event.getPrenom()).append(" ").append(event.getNom()).append("\n\n");
-        sb.append("Votre commande N° ").append(event.getNumCommande()).append(" est établie avec succès.\n\n");
-        sb.append("Détails de la commande:\n");
-        sb.append("\nMerci pour votre confiance!");
-        return sb.toString();
-    }
+
 }
