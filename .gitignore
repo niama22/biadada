@@ -1,0 +1,42 @@
+# Java / Maven
+target/
+*.class
+.mvn/
+*.jar
+*.war
+*.ear
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Angular / Node
+node_modules/
+dist/
+/frontend/dist/
+/frontend/tmp/
+/frontend/out-tsc/
+/frontend/bazel-out/
+/frontend/test-results/
+.angular/
+package-lock.json
+
+# Docker (optional - only ignore if you don't want to commit these)
+# .env
+
+# OS
+.DS_Store
+Thumbs.db

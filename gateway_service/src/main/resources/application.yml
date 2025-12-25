@@ -1,0 +1,109 @@
+spring:
+  application:
+    name: gateway-service
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/micro-achat-realm
+
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: r1
+          uri: lb://SERVICE-PRODUIT
+          predicates:
+            - Path=/api/produits/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: produitCircuitBreaker
+                fallbackUri: forward:/fallback/produit
+        - id: r2
+          uri: lb://SERVICE-COMMANDE
+          predicates:
+            - Path=/api/commande/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: commandeCircuitBreaker
+                fallbackUri: forward:/fallback/commande
+        - id: r3
+          uri: lb://SERVICE-CATALOG
+          predicates:
+            - Path=/api/catalogue/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalogCircuitBreaker
+                fallbackUri: forward:/fallback/catalog
+server:
+  port: 8888
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 3s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        minimumNumberOfCalls: 5
+    instances:
+      produitCircuitBreaker:
+        baseConfig: default
+      commandeCircuitBreaker:
+        baseConfig: default
+      catalogCircuitBreaker:
+        baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 3s
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 2s
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
