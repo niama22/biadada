@@ -7,20 +7,20 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+
 public class CommandeRequest {
-    private List<ArticleLigneCommandeDto> articleLigneCommandeDtoList;
+
+    private List<String> skuCodes;
     private String nom;
     private String prenom;
     private String email;
 
-    public List<ArticleLigneCommandeDto> getArticleLigneCommandeDtoList() {
-        return articleLigneCommandeDtoList;
+    public List<String> getSkuCodes() {
+        return skuCodes;
     }
 
-    public void setArticleLigneCommandeDtoList(List<ArticleLigneCommandeDto> articleLigneCommandeDtoList) {
-        this.articleLigneCommandeDtoList = articleLigneCommandeDtoList;
+    public void setSkuCodes(List<String> skuCodes) {
+        this.skuCodes = skuCodes;
     }
 
     public String getEmail() {
@@ -45,5 +45,15 @@ public class CommandeRequest {
 
     public void setNom(String nom) {
         this.nom = nom;
+    }
+
+    public CommandeRequest() {
+    }
+
+    public CommandeRequest(List<String> skuCodes, String nom, String prenom, String email) {
+        this.skuCodes = skuCodes;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.email = email;
     }
 }

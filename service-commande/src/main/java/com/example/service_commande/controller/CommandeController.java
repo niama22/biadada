@@ -16,15 +16,9 @@ public class CommandeController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker(name = "catalogue", fallbackMethod = "fallbackMethod")
     public String etablirCommande(@RequestBody CommandeRequest commandeRequest) {
         commandeService.etablirCommande(commandeRequest);
         return "la commande etablie avec succes";
     }
 
-    public String fallbackMethod(CommandeRequest commandeRequest, RuntimeException ex) {
-        System.err.println("Fallback triggered due to: " + ex.getMessage());
-        ex.printStackTrace();
-        return "Problème de connexion, Veuillez réssayer ";
-    }
 }
